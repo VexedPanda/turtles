@@ -8,8 +8,6 @@ Direction.EAST = 1
 Direction.SOUTH = 2
 Direction.WEST = 3
 
-local detoured = true
-
 local dir = 0
 local pos = Vector.new(0, 0, 0)
 
