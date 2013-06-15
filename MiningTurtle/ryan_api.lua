@@ -10,7 +10,7 @@ setmetatable(Slave, {
 
 function Slave.new(modem)
     local self = setmetatable({}, Slave)
-    self.id = math.random(65534)+1
+    self.id = math.random(65534) + 1
     self.modem = modem
     modem.open(self.id) -- allow messages to be received
     self.secret = "hta!i780'dbja8p#093$jmh{*320u8jkbtn$#danmj"

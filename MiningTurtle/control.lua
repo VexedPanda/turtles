@@ -13,7 +13,7 @@ while true do
         if result == nil then
             print(": nil")
         else
-            print(": "..tostring(result))
+            print(": " .. tostring(result))
         end
     end
 end
