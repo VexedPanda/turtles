@@ -1,0 +1,300 @@
+local BASE_URL = "http://pastebin.com/u/warfar"
+
+
+
+--- Quickhelp Documentation (ctrl-Q)
+
+-- This is called when the user invokes quick help via ctrl-q, or by
+
+-- having the quickhelp panel open and set to autolookup
+
+-- @param name The name to get documentation for.
+
+-- @return the documentation as an HTML or plain text string
+
+function getDocumentation(name)
+
+    -- Use for development
+
+    -- disableCache()
+
+    -- log(name)
+
+    local data = fetchURL(getDocumentationUrl(name))
+
+
+
+    local contentTag = [[<div id='content'>]]
+
+    local footerTag = [[<div id='footer'>]]
+
+
+
+    local contentPos = data:find(contentTag);
+
+    local footerPos = data:find(footerTag);
+
+
+
+    data = data:sub(contentPos, footerPos)
+
+
+
+    data =  data:gsub([[href="]], [[href="]]..BASE_URL)
+
+
+
+    data = "<html><h3>" .. name .. "</h3>" .. data .. "<br><br><b>[data provided by http://pastebin.com/u/warfar]</b></html>"
+
+
+
+    return data
+
+end
+
+
+
+--- External Documentation URL (shift-F1)
+
+-- This is called by shift-F1 on the symbol, or by the
+
+-- external documentation button on the quick help panel
+
+-- @param name The name to get documentation for.
+
+-- @return the URL of the external documentation
+
+function getDocumentationUrl(name) 
+
+    local p1, p2 = string.match(name, "(%a+)\.?(%a*)")
+
+    local url = BASE_URL .. "" .. p1
+
+
+
+    if p2 then url = url .. p2 end
+
+
+
+    return url
+
+end
+
+
+
+
+
+--- Quick Navigation Tooltip Text, (ctrl-hover on symbol)
+
+-- This is called when the user ctrl-hovers over a symbol
+
+-- @param name The name to get documentation for.
+
+-- @return the documentation as a plain text string
+
+function getQuickNavigateDocumentation(name)
+
+    local sig = SIGNATURES[name]
+
+    if not sig then return end
+
+
+
+    return "[http://pastebin.com/u/warfar]\r\n " .. sig
+
+end
+
+
+
+
+
+--[[ CC FUNCTION SIGNATURES ]]
+
+
+
+SIGNATURES = {
+bit = [=["(table)bit library"]=],
+colors = [=["(table)colors library"]=],
+disk = [=["(table)disk library"]=],
+fs = [=["(table)fs library"]=],
+gps = [=["(table)gps library"]=],
+http = [=["(table)http library"]=],
+keys = [=["(table)keys library"]=],
+os = [=["(table)os library"]=],
+paintutils = [=["(table)paintutils library"]=],
+parallel = [=["(table)parallel library"]=],
+peripheral = [=["(table)peripheral library"]=],
+rednet = [=["(table)rednet library"]=],
+redstone = [=["(table)redstone library"]=],
+shell = [=["(table)shell library"]=],
+term = [=["(table)term library"]=],
+textutils = [=["(table)textutils library"]=],
+turtle = [=["(table)turtle library"]=],
+vector = [=["(table)vector library"]=],
+["bit.blshift"] = [=[bit.blshift(int n, int bits)]=],
+["bit.brshift"] = [=[bit.brshift(int n, int bits)]=],
+["bit.blogic_rshift"] = [=[bit.blogic_rshift(int n, int bits)]=],
+["bit.bxor"] = [=[bit.bxor(int m, int n)]=],
+["bit.bor"] = [=[bit.bor(int m, int n)]=],
+["bit.and"] = [=[bit.band(int m, int n)]=],
+["bit.not"] = [=[bit.bnot(int n)]=],
+["colors.combine"] = [=[colors.combine(int color1, int color2, …)]=],
+["colors.subtract"] = [=[colors.subtract(int colors, int color1, int color2, …)]=],
+["colors.test"] = [=[colors.test(int colors, int color)]=],
+["disk.isPresent"] = [=[disk.isPresent(string side)]=],
+["disk.hasData"] = [=[disk.hasData(string side)]=],
+["disk.getMountPath"] = [=[disk.getMountPath(string side)]=],
+["disk.setLabel"] = [=[disk.setLabel(string side, string label)]=],
+["disk.getLabel"] = [=[disk.getLabel(string side)]=],
+["disk.getID"] = [=[disk.getID(string side)]=],
+["disk.hasAudio"] = [=[disk.hasAudio(string side)]=],
+["disk.getAudioTitle"] = [=[disk.getAudioTitle(string side)]=],
+["disk.playAudio"] = [=[disk.playAudio(string side)]=],
+["disk.stopAudio"] = [=[disk.stopAudio(string side)]=],
+["disk.eject"] = [=[disk.eject(string side)]=],
+["fs.list"] = [=[fs.list(string path)]=],
+["fs.exists"] = [=[fs.exists(string path)]=],
+["fs.isDir"] = [=[fs.isDir(string path)]=],
+["fs.isReadOnly"] = [=[fs.isReadOnly(string path)]=],
+["fs.getName"] = [=[fs.getName(string path)]=],
+["fs.getDrive"] = [=[fs.getDrive(string path)]=],
+["fs.getSize"] = [=[fs.getSize(string path)]=],
+["fs.getFreeSpace"] = [=[fs.getFreeSpace(string path)]=],
+["fs.makeDir"] = [=[fs.makeDir(string path)]=],
+["fs.move"] = [=[fs.move(string fromPath, string toPath)]=],
+["fs.copy"] = [=[fs.copy(string fromPath, string toPath)]=],
+["fs.delete"] = [=[fs.delete(string path)]=],
+["fs.combine"] = [=[fs.combine(string basePath, string localPath)]=],
+["fs.open"] = [=[fs.open(string path, string mode)]=],
+["gps.locate"] = [=[gps.locate([float timeout [, boolean debug]])]=],
+["http.request"] = [=[http.request( url, *postData )]=],
+["http.get"] = [=[http.get( url )]=],
+["http.post"] = [=[http.post( url, postData )]=],
+["keys.getName"] = [=[keys.getName(int code)]=],
+["os.version"] = [=[os.version()]=],
+["os.getComputerID"] = [=[os.getComputerID()]=],
+["os.getComputerLabel"] = [=[os.getComputerLabel()]=],
+["os.setComputerLabel"] = [=[os.setComputerLabel( string label )]=],
+["os.run"] = [=[os.run( table environment, string program path [, string arguments] )]=],
+["os.loadAPI"] = [=[os.loadAPI( string name )]=],
+["os.unloadAPI"] = [=[os.unloadAPI( string name )]=],
+["os.pullEvent"] = [=[os.pullEvent( string target-event )]=],
+["os.pullEventRaw"] = [=[os.pullEventRaw()]=],
+["os.queueEvent"] = [=[os.queueEvent( string event, param1, param2, ... )]=],
+["os.clock"] = [=[os.clock()]=],
+["os.startTimer"] = [=[os.startTimer( int timeout )]=],
+["os.sleep"] = [=[os.sleep( int timeout )]=],
+["os.time"] = [=[os.time()]=],
+["os.day"] = [=[os.day()]=],
+["os.setAlarm"] = [=[os.setAlarm( float time )]=],
+["os.shutdown"] = [=[os.shutdown()]=],
+["os.reboot"] = [=[os.reboot()]=],
+["paintutils.loadImage"] = [=[paintutils.loadImage(string path)]=],
+["paintutils.drawImage"] = [=[paintutils.drawImage(image, int x, int y)]=],
+["paintutils.drawPixel"] = [=[paintutils.drawPixel(int x, int y, int colour)]=],
+["paintutils.drawLine"] = [=[paintutils.drawLine(int startX, int startY, int endX, int endY, int color)]=],
+["parallel.waitForAny"] = [=[parallel.waitForAny(function1, function2, ...)]=],
+["parallel.waitForAll"] = [=[parallel.waitForAll(function1, function2, ...)]=],
+["peripheral.isPresent"] = [=[peripheral.isPresent(side)]=],
+["peripheral.getType"] = [=[peripheral.getType(side)]=],
+["peripheral.getMethods"] = [=[peripheral.getMethods(side)]=],
+["peripheral.call"] = [=[peripheral.call(side, methodName, param1, param2, ...)]=],
+["peripheral.wrap"] = [=[peripheral.wrap(side)]=],
+["rednet.open"] = [=[rednet.open(string side)]=],
+["rednet.close"] = [=[rednet.close(string side)]=],
+["rednet.announce"] = [=[rednet.announce()]=],
+["rednet.send"] = [=[rednet.send(int receiverID, message)]=],
+["rednet.broadcast"] = [=[rednet.broadcast(message)]=],
+["rednet.receive"] = [=[rednet.receive(int timeout)]=],
+["rednet.isOpen"] = [=[rednet.isOpen(string side)]=],
+["redstone.getSides"] = [=[redstone.getSides()]=],
+["redstone.getInput"] = [=[redstone.getInput(string side)]=],
+["redstone.setOutput"] = [=[redstone.setOutput(string side, boolean value)]=],
+["redstone.getOutput"] = [=[redstone.getOutput(string side)]=],
+["redstone.getBundledInput"] = [=[redstone.getBundledInput(string side)]=],
+["redstone.getBundledOutput"] = [=[redstone.getBundledOutput(string side)]=],
+["redstone.setBundledOutput"] = [=[redstone.setBundledOutput(string side, int colors)]=],
+["redstone.testBundledInput"] = [=[redstone.testBundledInput(string side, int color)]=],
+["shell.exit"] = [=[shell.exit()]=],
+["shell.dir"] = [=[shell.dir()]=],
+["shell.setDir"] = [=[shell.setDir(string path)]=],
+["shell.path"] = [=[shell.path()]=],
+["shell.setPath"] = [=[shell.setPath(string path)]=],
+["shell.resolve"] = [=[shell.resolve(string localpath)]=],
+["shell.resolveProgram"] = [=[shell.resolveProgram(string name)]=],
+["shell.aliases"] = [=[shell.aliases()]=],
+["shell.setAliases"] = [=[shell.setAlias(string alias, string program)]=],
+["shell.clearAliases"] = [=[shell.clearAlias(string alias, string program)]=],
+["shell.programs"] = [=[shell.programs([boolean hidden])]=],
+["shell.run"] = [=[shell.run(string program, string arguments)]=],
+["shell.getRunningProgram"] = [=[shell.getRunningProgram()]=],
+["term.write"] = [=[term.write(string text)]=],
+["term.clear"] = [=[term.clear()]=],
+["term.clearLine"] = [=[term.clearLine()]=],
+["term.getCursorPos"] = [=[term.getCursorPos()]=],
+["term.setCursorPos"] = [=[term.setCursorPos(int x, int y)]=],
+["term.setCursorBlink"] = [=[term.setCursorBlink(boolean bool)]=],
+["term.isColor"] = [=[term.isColor()]=],
+["term.scroll"] = [=[term.scroll(int n)]=],
+["term.redirect"] = [=[term.redirect(target)]=],
+["term.restore"] = [=[term.restore()]=],
+["term.setTextColor"] = [=[term.setTextColor(int color)]=],
+["term.setBackgroundColor"] = [=[term.setBackgroundColor(int color)]=],
+["textutils.slowPrint"] = [=[textutils.slowPrint(string text, int rate)]=],
+["textutils.slotWrite"] = [=[textutils.slowWrite(string text, int rate)]=],
+["textutils.formatTime"] = [=[textutils.formatTime(int time, boolean TwentyFourHour)]=],
+["textutils.tabulate"] = [=[textutils.tabulate(table table, table table2, ...)]=],
+["textutils.pagedTabulate"] = [=[textutils.pagedTabulate(table table, table table2, ...)]=],
+["textutils.pagedPrint"] = [=[textutils.pagedPrint(string text, string confirmation_lines)]=],
+["textutils.serialize"] = [=[textutils.serialize(table table)]=],
+["textutils.unserialize"] = [=[textutils.unserialize(string text)]=],
+["textutils.urlEncode"] = [=[textutils.urlEncode(string text)]=],
+["turtle.forward"] = [=[turtle.forward()]=],
+["turtle.back"] = [=[turtle.back()]=],
+["turtle.up"] = [=[turtle.up()]=],
+["turtle.down"] = [=[turtle.down()]=],
+["turtle.turnLeft"] = [=[turtle.turnLeft()]=],
+["turtle.turnRight"] = [=[turtle.turnRight()]=],
+["turtle.select"] = [=[turtle.select(slotNum)]=],
+["turtle.getItemCount"] = [=[turtle.getItemCount(slotNum)]=],
+["turtle.getItemSpace"] = [=[turtle.getItemSpace(slotNum)]=],
+["turtle.dig"] = [=[turtle.dig()]=],
+["turtle.digUp"] = [=[turtle.digUp()]=],
+["turtle.digDown"] = [=[turtle.digDown()]=],
+["turtle.place"] = [=[turtle.place()]=],
+["turtle.placeUp"] = [=[turtle.placeUp()]=],
+["turtle.placeDown"] = [=[turtle.placeDown()]=],
+["turtle.attack"] = [=[turtle.attack]=],
+["turtle.attackUp"] = [=[turtle.attackUp()]=],
+["turtle.attackDown"] = [=[turtle.attackDown()]=],
+["turtle.detect"] = [=[turtle.detect()]=],
+["turtle.detectUp"] = [=[turtle.detectUp()]=],
+["turtle.detectDown"] = [=[turtle.detectDown()]=],
+["turtle.compare"] = [=[turtle.compare()]=],
+["turtle.compareUp"] = [=[turtle.compareUp()]=],
+["turtle.compareDown"] = [=[turtle.compareDown()]=],
+["turtle.compareTo"] = [=[turtle.compareTo(slot)]=],
+["turtle.transferTo"] = [=[turtle.transferTo(slot, quantity)]=],
+["turtle.drop"] = [=[turtle.drop(count)]=],
+["turtle.dropUp"] = [=[turtle.dropUp(count)]=],
+["turtle.dropDown"] = [=[turtle.dropDown(count)]=],
+["turtle.suck"] = [=[turtle.suck()]=],
+["turtle.suckUp"] = [=[turtle.suckUp()]=],
+["turtle.suckDown"] = [=[turtle.suckDown()]=],
+["turtle.getFuelLevel"] = [=[turtle.getFuelLevel()]=],
+["turtle.refuel"] = [=[turtle.refuel(quantity)]=],
+["turtle.craft "] = [=[turtle.craft(quantity)]=],
+["vector.new"] = [=[vector.new(float x, float y, float z)]=],
+["vector.x"] = [=[vector.x()]=],
+["vector.y"] = [=[vector.y()]=],
+["vector.z"] = [=[vector.z()]=],
+["vector:add"] = [=[vectorA:add(vector vectorB)]=],
+["vector:sub"] = [=[vectorA:sub(vector vectorB)]=],
+["vector:mul"] = [=[vectorA:mul(float n)]=],
+["vector:dot"] = [=[vectorA:dot(vector vectorB)]=],
+["vector:cross"] = [=[vectorA:cross(vector vectorB)]=],
+["vector:length"] = [=[vectorA:length()]=],
+["vector:normalize"] = [=[vectorA:normalize()]=],
+["vector:round"] = [=[vectorA:round()]=],
+["vector:tostring"] = [=[vectorA:tostring()]=]
+}

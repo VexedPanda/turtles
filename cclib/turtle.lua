@@ -1,0 +1,36 @@
+module "turtle"
+function forward() print "forward" end
+function back() end
+function up() end
+function down() end
+function turnLeft() end
+function turnRight() end
+function select() end
+function getItemCount() end
+function getItemSpace() end
+function dig() end
+function digUp() end
+function digDown() end
+function place() end
+function placeUp() end
+function placeDown() end
+function attack() end
+function attackUp() end
+function attackDown() end
+function detect() end
+function detectUp() end
+function detectDown() end
+function compare() end
+function compareUp() end
+function compareDown() end
+function compareTo() end
+function transferTo() end
+function drop() end
+function dropUp() end
+function dropDown() end
+function suck() end
+function suckUp() end
+function suckDown() end
+function getFuelLevel() end
+function refuel() end
+function craft()  end
