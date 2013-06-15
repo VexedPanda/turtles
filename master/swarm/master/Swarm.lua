@@ -20,6 +20,8 @@ local function handleNet()
         MessageHandler.onJoin({ turtleID = message.__SENDER })
     elseif message.type == "LEAVE" then
         MessageHandler.onLeave({ turtleID = message.__SENDER })
+    elseif message.type == "FREE" then
+        MessageHandler.onFree({ turtleID = message.__SENDER })
     else
         Hook.call("NetMessage", { message = message })
     end
@@ -55,6 +57,16 @@ function Swarm.submitTask(task, turtles)
     end
 end
 
+function Swarm.submitTaskToAllFree(task)
+    print("Submitting")
+    local turtles = Swarm.allocTurtles(#freeTurtles)
+    for i = 1, #turtles do
+        print("to turtle " .. i)
+        local turtle = turtles[i]
+        turtle:run(i, task)
+    end
+end
+
 function MessageHandler.onJoin(event)
     local turtle = Turtle.new(event.turtleID)
     idTurtleMap[event.turtleID] = turtle
@@ -67,4 +79,11 @@ function MessageHandler.onLeave(event)
     Hook.call("TurtleLeave", { turtle = idTurtleMap[event.turtleID] })
     turtles[idTurtleMap[event.turtleID]] = nil
     idTurtleMap[event.turtleID] = nil
+end
+
+function MessageHandler.onFree(event)
+    local freeTurtle = idTurtleMap[event.turtleID]
+    Hook.call("TurtleFree", { turtle = freeTurtle })
+    busyTurtles[freeTurtle] = nil
+    table.insert(freeTurtles, freeTurtle)
 end

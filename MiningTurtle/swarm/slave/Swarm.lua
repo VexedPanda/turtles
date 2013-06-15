@@ -13,6 +13,7 @@ function handleNet()
     if message.type == "RUN" then
         threadPool:add(function()
             loadstring(message.byteCode)(message.workerID)
+            Swarm.free()
         end)
     end
 end
@@ -21,6 +22,10 @@ function Swarm.run()
     while true do
         threadPool:runOnce()
     end
+end
+
+function Swarm.free()
+    NetManager.send(Swarm.masterID, { type = "FREE" })
 end
 
 function Swarm.init(masterID, channel, modemSide)

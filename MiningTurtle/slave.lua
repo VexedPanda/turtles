@@ -1,4 +1,4 @@
-os.loadAPI("/apis/include.lua")
+os.loadAPI("/apis/include")
 
 include.clean()
 include.path("/swarm/slave/")
@@ -17,7 +17,7 @@ Navigation.setOrientation(Direction.NORTH, Vector.new(0, 0, 0))
 
 Swarm.init(masterID, 7926, "right")
 Swarm.join()
-
+print("Joined swarm")
 Swarm.run()
 
 Navigation.restoreFunctions()
