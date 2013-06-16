@@ -23,11 +23,12 @@ local function handleNet()
     elseif message.type == "FREE" then
         MessageHandler.onFree({ turtleID = message.__SENDER })
     else
-        Hook.call("NetMessage", { message = message })
+        Hook.call("NetMessage", { message = message, turtleId = message.__SENDER })
     end
 end
 
 function Swarm.run()
+    --TODO: Use threads to listen to console and network at the same time
     while true do
         handleNet()
     end

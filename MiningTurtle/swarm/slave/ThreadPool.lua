@@ -25,6 +25,7 @@ function ThreadPool:runThread(thread)
         end
 
         if coroutine.status(thread) == "dead" then
+            print("Thread dead")
             return false
         end
     end
@@ -41,12 +42,15 @@ end
 
 -- Runs the threads once and returns
 function ThreadPool:runOnce()
+    print("nw")
     if (self.networkListenerThread ~= nil and not self:runThread(self.networkListenerThread)) then
         self.networkListenerThread = nil
     end
+    print("fg")
     if (self.foregroundThread ~= nil and not self:runThread(self.foregroundThread)) then
         self.foregroundThread = nil
     end
+    print("bg")
     for i = 1, #self.threads do
         if (not self:runThread(self.threads[i])) then
             table.remove(self.threads, i)
@@ -56,20 +60,24 @@ function ThreadPool:runOnce()
     self.eventData = { os.pullEventRaw() }
 end
 
+
 -- Adds a thread to this ThreadPool
 function ThreadPool:add(func)
+    print("Got new background task")
     local thread = coroutine.create(func)
     table.insert(self.threads, thread)
     self:runThread(thread)
 end
 
 function ThreadPool:setForegroundTask(func)
+    print("Got new foreground task")
     local thread = coroutine.create(func)
     self.foregroundThread = thread
     self:runThread(thread)
 end
 
 function ThreadPool:setNetworkListener(func)
+    print("Got new network listener")
     local thread = coroutine.create(func)
     self.networkListenerThread = thread
     self:runThread(thread)

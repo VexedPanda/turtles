@@ -6,25 +6,6 @@ Swarm = {}
 
 local threadPool = ThreadPool.new()
 
--- This runs in a seperate thread
-function handleNet()
-    while true do
-        local message = NetManager.receive()
-
-        if message.type == "RUN" then
-            threadPool:setForegroundTask(function()
-                loadstring(message.byteCode)(message.workerID)
-                Swarm.free()
-            end)
-        elseif message.type == "RUNBG" then
-            threadPool:add(function()
-                loadstring(message.byteCode)()
-            end)
-        end
-        coroutine.yield()
-    end
-end
-
 function Swarm.run()
     while true do
         threadPool:runOnce()
@@ -52,4 +33,22 @@ function Swarm.leave()
     })
 end
 
-threadPool:setNetworkListener(handleNet)
+-- This runs in a seperate thread
+threadPool:setNetworkListener(function()
+    while true do
+        print("checking for messages")
+        local message = NetManager.receive()
+        print("got message")
+        if message.type == "RUN" then
+            threadPool:setForegroundTask(function()
+                loadstring(message.byteCode)(message.workerID)
+                Swarm.free()
+            end)
+        elseif message.type == "RUNBG" then
+            threadPool:add(function()
+                loadstring(message.byteCode)()
+            end)
+        end
+        coroutine.yield()
+    end
+end)

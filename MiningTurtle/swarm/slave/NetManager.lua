@@ -31,6 +31,6 @@ function NetManager.receive()
             message = nil
         end
     end
-
+    print("got message")
     return message
 end
