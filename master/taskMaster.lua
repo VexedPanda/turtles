@@ -14,6 +14,9 @@ include.file("Hook.lua")
 
 local tasks = {}
 tasks["test"] = function(slaveId)
+    local subfunction = function()
+        print("Ran Subfunction")
+    end
     print("New task! Task Worker ID: " .. slaveId)
     --noinspection UnassignedVariableAccess
     sleep(slaveId)
@@ -21,6 +24,7 @@ tasks["test"] = function(slaveId)
     --noinspection UnassignedVariableAccess
     sleep(1.5)
     turtle.down()
+    subfunction()
     print("Task finished!")
 end
 tasks["reportLocation"] = function()

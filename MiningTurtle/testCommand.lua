@@ -8,5 +8,5 @@ local message = {}
 message.type = "TASK"
 message.task = "test"
 print("Sending task " .. message.task)
-NetManager.open(7926, "right")
+NetManager.open(7926, "top")
 NetManager.send(11, message)
