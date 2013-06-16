@@ -26,17 +26,13 @@ end
 tasks["reportLocation"] = function()
     while true do
         --Report position back to me every 10 seconds
-        print("sleeping for 10")
         os.sleep(10)
-        print("Reporting Location")
         --noinspection UnassignedVariableAccess
         NetManager.send(Swarm.masterID, {
             type = "LOCATION",
             pos = Navigation.pos(),
             dir = Navigation.dir()
         })
-        print("yielding")
-        coroutine.yield()
     end
 end
 

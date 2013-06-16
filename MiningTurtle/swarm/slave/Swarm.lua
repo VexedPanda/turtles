@@ -33,12 +33,10 @@ function Swarm.leave()
     })
 end
 
--- This runs in a seperate thread
-threadPool:setNetworkListener(function()
+-- This runs in a background thread since it doesn't interfere with normal operations
+threadPool:add(function()
     while true do
-        print("checking for messages")
         local message = NetManager.receive()
-        print("got message")
         if message.type == "RUN" then
             threadPool:setForegroundTask(function()
                 loadstring(message.byteCode)(message.workerID)
@@ -49,6 +47,5 @@ threadPool:setNetworkListener(function()
                 loadstring(message.byteCode)()
             end)
         end
-        coroutine.yield()
     end
 end)
