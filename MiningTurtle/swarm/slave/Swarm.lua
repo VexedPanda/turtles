@@ -3,18 +3,25 @@ include.file("ThreadPool.lua")
 include.file("Navigation.lua")
 
 Swarm = {}
-local MessageHandler = {}
 
 local threadPool = ThreadPool.new()
 
+-- This runs in a seperate thread
 function handleNet()
-    local message = NetManager.receive()
+    while true do
+        local message = NetManager.receive()
 
-    if message.type == "RUN" then
-        threadPool:add(function()
-            loadstring(message.byteCode)(message.workerID)
-            Swarm.free()
-        end)
+        if message.type == "RUN" then
+            threadPool:setForegroundTask(function()
+                loadstring(message.byteCode)(message.workerID)
+                Swarm.free()
+            end)
+        elseif message.type == "RUNBG" then
+            threadPool:add(function()
+                loadstring(message.byteCode)()
+            end)
+        end
+        coroutine.yield()
     end
 end
 
@@ -45,4 +52,4 @@ function Swarm.leave()
     })
 end
 
-threadPool:add(handleNet)
+threadPool:setNetworkListener(handleNet)

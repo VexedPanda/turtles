@@ -17,3 +17,10 @@ function Turtle:run(workerID, func)
         byteCode = string.dump(func)
     })
 end
+
+function Turtle:runbg(func)
+    NetManager.send(self.id, {
+        type = "RUNBG",
+        byteCode = string.dump(func)
+    })
+end

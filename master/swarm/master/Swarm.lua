@@ -50,6 +50,8 @@ function Swarm.allocTurtles(amount)
     return turtles
 end
 
+--TODO track how many turtles are on tasks, allow others to be added. Ensure they have a unique worker id
+
 function Swarm.submitTask(task, turtles)
     for i = 1, #turtles do
         local turtle = turtles[i]

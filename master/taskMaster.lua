@@ -18,7 +18,7 @@ include.file("Hook.lua")
 
 Hook.add("TurtleJoin", function(event)
     print("Turtle #" .. event.turtle.id .. " has joined the swarm!")
-
+--TODO: Add a task to report position every 10 sec
 --    local turtles = Swarm.allocTurtles(1)
 --    if turtles then
 --        print("Allocated " .. #turtles .. " turtles!")
