@@ -5,8 +5,11 @@ include.path("/swarm/slave/")
 include.file("NetManager.lua")
 
 local message = {}
-message.type = "TASK"
+message.type = "QUEUE_TASK"
 message.task = "test"
-print("Sending task " .. message.task)
+message.turtleId = 9
+
 NetManager.open(7926, "top")
+
+NetManager.send(11, message)
 NetManager.send(11, message)

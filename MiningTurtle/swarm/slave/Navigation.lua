@@ -24,7 +24,18 @@ local function toVector(dir)
 end
 
 -- TODO: add fuel checking
-function Navigation.goTo(npos)
+function Navigation.goTo(npos, dig)
+    dig = dig or false
+    local goUp = turtle.up
+    local goDown = turtle.down
+    local goForward = turtle.forward
+
+    if dig then
+        goUp = turtle.mineUp
+        goDown = turtle.mineDown
+        goForward = turtle.mineForward
+    end
+
     local x = pos.x
     local y = pos.y
     local z = pos.z
@@ -35,7 +46,7 @@ function Navigation.goTo(npos)
     local dirZ = nz > z and 1 or -1
     for i = 1, math.abs(z - nz) do
         -- Go up or down and do path checking
-        if not (dirZ == 1 and turtle.up() or turtle.down()) then
+        if not (dirZ == 1 and goUp() or goDown()) then
             -- TODO
         end
     end
@@ -47,7 +58,7 @@ function Navigation.goTo(npos)
     end
 
     for i = 1, math.abs(nx - x) do
-        turtle.forward()
+        goForward()
     end
 
     if ny < y then
@@ -57,9 +68,11 @@ function Navigation.goTo(npos)
     end
 
     for i = 1, math.abs(ny - y) do
-        turtle.forward()
+        goForward()
     end
 end
+
+
 
 -- format is turnTable[dir][ndir] = turns
 local turnTable = {}
@@ -176,4 +189,41 @@ function Navigation.restoreFunctions()
     turtle.__back = nil
     turtle.__turnLeft = nil
     turtle.__turnRight = nil
+end
+
+turtle.mineUp = function()
+    while turtle.detectUp() do
+        turtle.digUp()
+        os.sleep(0.5)
+    end
+    while not turtle.up() do
+        -- retry
+    end
+
+    return true
+end
+turtle.mineDown = function()
+    if turtle.detectDown() and not turtle.digDown() then
+        return false
+    end
+    while not turtle.down() do
+        --retry
+    end
+    return true
+end
+turtle.mineForward = function(goUpIfNecessary)
+    while (turtle.detect()) do
+        if not turtle.dig() then
+            --Must be bedrock in front of us.
+            if not goUpIfNecessary then
+                return false
+            end
+            -- Move up and try again
+            turtle.mineUp()
+        end
+        --wait for gravel to fall after digging
+        os.sleep(0.5)
+    end
+    turtle.forward()
+    return true
 end

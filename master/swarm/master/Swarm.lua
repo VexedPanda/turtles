@@ -28,7 +28,6 @@ local function handleNet()
 end
 
 function Swarm.run()
-    --TODO: Use threads to listen to console and network at the same time
     while true do
         handleNet()
     end
@@ -57,6 +56,7 @@ function Swarm.submitTask(task, turtles)
     for i = 1, #turtles do
         local turtle = turtles[i]
         turtle:run(i, task)
+        turtle.isFree = false
     end
 end
 
@@ -84,9 +84,29 @@ function MessageHandler.onLeave(event)
     idTurtleMap[event.turtleID] = nil
 end
 
+function Swarm.queueTask(turtleId, task)
+    local turtle = idTurtleMap[turtleId]
+    if turtle.isFree then
+        Swarm.submitTask(task, { turtle })
+    else
+        table.insert(turtle.queuedTasks, 1, task)
+    end
+end
+
+function Swarm.dequeueTask(turtle)
+    return table.remove(turtle.queuedTasks)
+end
+
 function MessageHandler.onFree(event)
     local freeTurtle = idTurtleMap[event.turtleID]
-    Hook.call("TurtleFree", { turtle = freeTurtle })
-    busyTurtles[freeTurtle] = nil
-    table.insert(freeTurtles, freeTurtle)
+    if #freeTurtle.queuedTasks == 0 then
+        Hook.call("TurtleFree", { turtle = freeTurtle })
+        busyTurtles[freeTurtle] = nil
+        table.insert(freeTurtles, freeTurtle)
+        freeTurtle.isFree = true
+        return
+    end
+    -- This turtle has a queued task, perform it.
+    local newTask = Swarm.dequeueTask(freeTurtle)
+    Swarm.submitTask(newTask, { freeTurtle })
 end

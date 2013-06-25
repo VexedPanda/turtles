@@ -38,8 +38,9 @@ threadPool:add(function()
     while true do
         local message = NetManager.receive()
         if message.type == "RUN" then
+            local func, params = Util.parseTask(loadstring(message.byteCode))
             threadPool:setForegroundTask(function()
-                loadstring(message.byteCode)(message.workerID)
+                func(message.workerID, unpack(params))
                 Swarm.free()
             end)
         elseif message.type == "RUNBG" then

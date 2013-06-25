@@ -42,3 +42,7 @@ function Util.copy(t)
 
     return ret
 end
+
+function Util.parseTask(task)
+    return task.func, task.params
+end

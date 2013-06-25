@@ -32,17 +32,14 @@ function StatefulTurtle.new(initialDepth)
     self.groupStart[8] = 50
     self.groupNum = 1
 
-    -- We start above the chest facing -y (a wall the chest is against that we can be placed next to)
+    -- We start above the chest facing y
     self.x = -1
     self.y = -1
     self.chest = { x = -1, y = -1 }
-    self.orientation = "-y"
+    self.orientation = "y"
 
     return self
 end
-
---TODO: Support groups
---TODO: Read group from stone count
 
 function StatefulTurtle:turnRight()
     if (self.orientation == "y") then

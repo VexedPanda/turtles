@@ -42,3 +42,8 @@ function Util.copy(t)
 
     return ret
 end
+
+function Util.buildTask(func, params)
+    params = params or {}
+    return { func = func, params = params }
+end
