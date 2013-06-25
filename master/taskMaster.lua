@@ -173,11 +173,11 @@ end)
 Hook.add("NetMessage", function(event)
     if (event.message.type == "TASK") then
         print(event.message.task)
-        Swarm.submitTaskToAllFree(Util.buildTask(tasks[event.message.task]))
+        Swarm.submitTaskToAllFree(tasks[event.message.task], event.message.params)
         return
     end
     if event.message.type == "QUEUE_TASK" then
-        Swarm.queueTask(event.message.turtleId, Util.buildTask(tasks[event.message.task]))
+        Swarm.queueTask(event.message.turtleId, tasks[event.message.task], event.message.params)
         printStatus(event.message.turtleId, "busy")
         return
     end
@@ -203,7 +203,8 @@ local console = function()
             print("What task?")
             local task = io.read()
             printStatus(turtleId, "busy")
-            Swarm.queueTask(turtleId, Util.buildTask(tasks[task]))
+            -- TODO: Support parameters
+            Swarm.queueTask(turtleId, tasks[task], {})
         end
     end
 end

@@ -52,21 +52,21 @@ end
 
 --TODO track how many turtles are on tasks, allow others to be added. Ensure they have a unique worker id
 
-function Swarm.submitTask(task, turtles)
+function Swarm.submitTask(func, params, turtles)
     for i = 1, #turtles do
         local turtle = turtles[i]
-        turtle:run(i, task)
+        turtle:run(i, func, params)
         turtle.isFree = false
     end
 end
 
-function Swarm.submitTaskToAllFree(task)
+function Swarm.submitTaskToAllFree(func, params)
     print("Submitting")
     local turtles = Swarm.allocTurtles(#freeTurtles)
     for i = 1, #turtles do
         print("to turtle " .. i)
         local turtle = turtles[i]
-        turtle:run(i, task)
+        turtle:run(i, func, params)
     end
 end
 
@@ -84,12 +84,12 @@ function MessageHandler.onLeave(event)
     idTurtleMap[event.turtleID] = nil
 end
 
-function Swarm.queueTask(turtleId, task)
+function Swarm.queueTask(turtleId, func, params)
     local turtle = idTurtleMap[turtleId]
     if turtle.isFree then
-        Swarm.submitTask(task, { turtle })
+        Swarm.submitTask(func, params, { turtle })
     else
-        table.insert(turtle.queuedTasks, 1, task)
+        table.insert(turtle.queuedTasks, 1, { func = func, params = params })
     end
 end
 
@@ -108,5 +108,5 @@ function MessageHandler.onFree(event)
     end
     -- This turtle has a queued task, perform it.
     local newTask = Swarm.dequeueTask(freeTurtle)
-    Swarm.submitTask(newTask, { freeTurtle })
+    Swarm.submitTask(newTask.func, newTask.params, { freeTurtle })
 end

@@ -13,17 +13,21 @@ function Turtle.new(id)
     return self
 end
 
-function Turtle:run(workerID, task)
+function Turtle:run(workerID, func, params)
+    params = params or {}
     NetManager.send(self.id, {
         type = "RUN",
         workerID = workerID,
-        byteCode = string.dump(task)
+        byteCode = string.dump(func),
+        params = params
     })
 end
 
-function Turtle:runbg(task)
+function Turtle:runbg(func, params)
+    params = params or {}
     NetManager.send(self.id, {
         type = "RUNBG",
-        byteCode = string.dump(task)
+        byteCode = string.dump(func),
+        params = params
     })
 end
