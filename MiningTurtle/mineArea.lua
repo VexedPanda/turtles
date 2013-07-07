@@ -15,24 +15,12 @@ StatefulTurtle.DESIRED_FUEL_LEVEL = 5000
 function StatefulTurtle.new(initialDepth)
     local self = setmetatable({}, StatefulTurtle)
     self.depth = initialDepth
-    self.hole = {}
-    self.hole[1] = { x = 0, y = 0, orientation = "x" }
-    self.hole[2] = { x = 2, y = 4, orientation = "y" }
-    self.hole[3] = { x = 1, y = 7, orientation = "-y" }
-    self.hole[4] = { x = 4, y = 8, orientation = "y" }
-    self.hole[5] = { x = 7, y = 9, orientation = "-y" }
-    self.hole[6] = { x = 8, y = 6, orientation = "y" }
-    self.hole[7] = { x = 5, y = 5, orientation = "-y" }
-    self.hole[8] = { x = 6, y = 2, orientation = "y" }
-    self.hole[9] = { x = 3, y = 1, orientation = "-y" }
-    self.hole[10] = { x = 8, y = 1, orientation = "x" }
-    self.nextHole = 1
 
-    -- We start above the chest facing y
-    self.x = -1
-    self.y = -1
-    self.chest = { x = -1, y = -1 }
+    -- We start above the first hole, with an edge on our left
+    self.x = 1
+    self.y = 1
     self.orientation = "y"
+    self.underground = false
 
     return self
 end
@@ -68,15 +56,16 @@ end
 function StatefulTurtle:sink()
     while turtle.down() do
         self.depth = self.depth + 1
-        --        print("sunk to " .. self.depth)
-        -- Seal our source hole so no one falls in. This considers the chest to be resting on ground level
-        if (self.depth == 3) then
+
+        -- Seal our source hole so no one falls in.
+        if (self:scan() and not self.underground) then
             turtle.select(StatefulTurtle.FILLER)
             turtle.placeUp()
             turtle.select(1)
+            self.underground = true
+            self.depth = 1
         end
         os.sleep(0)
-        self:scan()
     end
 end
 
@@ -84,22 +73,21 @@ function StatefulTurtle:rise()
     turtle.digUp()
     if (turtle.up()) then
         self.depth = self.depth - 1
-        --        print("rose to " .. self.depth)
-        self:scan()
+
+        if (not self:scan() and self.depth <= 0 and self.underground) then
+            -- We're above where we started, and see a gap around us. Fill the hole so no one falls in
+            turtle.select(StatefulTurtle.FILLER)
+            turtle.placeDown()
+            turtle.select(1)
+            self.underground = false
+        end
     end
     os.sleep(0)
 end
 
---function StatefulTurtle:findHighGround()
---    while turtle.detect() do
---        self:rise()
---    end
---end
-
 function StatefulTurtle:digHoleDown()
     self:sink()
     while turtle.digDown() do
-        --        print("dug down")
         self:sink()
     end
 end
@@ -107,30 +95,38 @@ end
 function StatefulTurtle:digHoleUp()
     while self.depth > 0 do
         self:rise()
-        if (turtle.digUp()) then
-            --            print("dug up")
-        end
+    end
+    -- keep mining until we're clear of obstructions
+    while turtle.detect() do
+        self:rise()
     end
 end
 
 -- Sees if there's any unusual ores around, and digs them if there is.
+-- Returns true if surrounded by stuff
 function StatefulTurtle:scan()
-    --    print("scanning")
+    local underground = true
     --noinspection UnusedDef
     for i = 1, 4 do
-        if detectInteresting() then
-            --            print("Found something interesting")
+        -- ensure we have room (including for any block above us this grabs)
+        if turtle.getItemCount(15) > 0 then
+            me:deposit()
+        end
+        if not turtle.detect() then
+            underground = false
+        elseif detectInteresting() then
             turtle.dig()
         end
         self:turnLeft()
     end
+    return underground
 end
 
 function detectInteresting()
     --empty space isn't interesting
-    if not turtle.detect() then
-        return false
-    end
+    --    if not turtle.detect() then
+    --        return false
+    --    end
 
     --The first 4 slots are filled with uninteresting things
     for j = StatefulTurtle.JUNK_START, StatefulTurtle.JUNK_END do
@@ -186,56 +182,89 @@ function StatefulTurtle:goForward()
     --    print("Now at " .. self.x .. ", " .. self.y)
 end
 
-function StatefulTurtle:digPairOfHoles()
-    local fuel = turtle.getFuelLevel()
-    if (fuel < 600) then
-        print("Too risky. Need more Fuel")
-        return false
+function StatefulTurtle:digHole()
+    if self.underground then
+        self:digHoleUp()
+    else
+        self:digHoleDown()
     end
 
-    self:digHoleDown()
-    -- Move to the next hole
-    self:digAndMoveForward()
-    self:turnRight()
-    self:digAndMoveForward()
-    self:digAndMoveForward()
-    self:turnLeft()
-    -- Ensure there's nothing we can get access to farther down
-    self:digHoleDown()
-    --Then dig up
-    self:digHoleUp()
-
-    --    self:findHighGround()
-    -- Fill our hole
-    turtle.select(StatefulTurtle.FILLER)
-    turtle.placeDown()
-    turtle.select(1)
-    print("Done pair of holes. Used " .. fuel - turtle.getFuelLevel() .. " fuel")
-    return true
+    print("Done hole. Used " .. fuel - turtle.getFuelLevel() .. " fuel")
 end
+
+StatefulTurtle.offset = {}
+StatefulTurtle.offset[1] = 1
+StatefulTurtle.offset[2] = 3
+StatefulTurtle.offset[3] = 5
+StatefulTurtle.offset[4] = 2
+StatefulTurtle.offset[5] = 4
 
 function StatefulTurtle:goToNextHole()
-    if (self.nextHole == 11) then
+    -- reverse direction every row
+    local direction = 1
+    if self.y % 2 == 0 then
+        direction = -1
+    end
+
+    -- The next hole is 5 farther along in the same direction
+    local nextY = self.y + direction * 5
+    local nextX = self.x
+
+    if nextY < 1 then
+        -- We've reached the bounds of the loaded chunks
+        -- Start the next row
+        nextX = nextX + 1
+        local xGroup = nextX % 5
+        if xGroup == 0 then
+            xGroup = 5
+        end
+        nextY = StatefulTurtle.offset[xGroup]
+    end
+
+    if nextY > 142 then
+        -- We've reached the bounds of the loaded chunks
+        -- Start the next row
+        nextX = nextX + 1
+        local xGroup = nextX % 5
+        if xGroup == 0 then
+            xGroup = 5
+        end
+        local startingOffset = StatefulTurtle.offset[xGroup]
+        --            1, 3, 5, 2, 4
+        local available = 142 - startingOffset
+        -- 141, 139, 137, 140, 138
+        local holeCount = math.floor(available / 5)
+        -- 28, 27, 27, 28, 27
+        local lastHole = holeCount * 5
+        -- 140, 135, 135, 140, 135
+        nextY = lastHole + startingOffset
+        --            141, 138, 140, 142, 139
+    end
+
+    if (nextX > 142) then
         return false
     end
-    local hole = self.hole[self.nextHole];
-    self:goToCoord({ x = hole.x, y = hole.y })
-    self:face(hole.orientation)
-    self.nextHole = self.nextHole + 1
+
+    self:goToCoord({ x = nextX, y = nextY })
+
     return true
 end
 
-function StatefulTurtle:digNextHoles()
+function StatefulTurtle:digNextHole()
+    if (not self.underground) then
+        local fuel = turtle.getFuelLevel()
+        if (fuel < 600) then
+            print("Too risky. Need more Fuel")
+            return false
+        end
+    end
+
     if (not me:goToNextHole()) then
         -- There's no next hole
         print("Done!")
         return false
     end
-    if (not me:digPairOfHoles()) then
-        -- Not enough fuel
-        print("Out of Fuel!")
-        return false
-    end
+    me:digHole()
     return true
 end
 
@@ -263,7 +292,7 @@ function StatefulTurtle:goToCoord(coord)
     --    print("Going to " .. destX .. ", " .. destY)
 
     -- get to depth 0
-    self:digHoleUp()
+    --        self:digHoleUp()
 
     -- Turning takes time, do as little as possible
     if (self.y > destY) then
@@ -273,7 +302,7 @@ function StatefulTurtle:goToCoord(coord)
     end
     --    print("moving in y")
     while (not (self.y == destY)) do
-        self:goForward()
+        self:digAndMoveForward()
     end
     if (self.x > destX) then
         self:face("-x")
@@ -282,7 +311,7 @@ function StatefulTurtle:goToCoord(coord)
     end
     --    print("moving in x")
     while (not (self.x == destX)) do
-        self:goForward()
+        self:digAndMoveForward()
     end
 end
 
@@ -343,7 +372,13 @@ function StatefulTurtle:deposit()
 end
 
 me = StatefulTurtle(0)
-while (me:digNextHoles()) do
-    me:deposit()
+local fuel = turtle.getFuelLevel()
+if (fuel < 600) then
+    print("Too risky. Need more Fuel")
+end
+
+me:digHole()
+
+while (me:digNextHole()) do
 end
 me:goToCoord({ x = 0, y = 0 })
